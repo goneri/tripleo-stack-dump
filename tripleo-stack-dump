@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+import os
+
+import json
+
+import heatclient.exc
+from heatclient.client import Client as heatClient
+from keystoneclient.v2_0 import client as keystoneclient
+
+def get_resources():
+    r = {}
+    for i in heat.resources.list('overcloud', nested_depth=5):
+        e = i.to_dict()
+        e['metadata'] = heat.resources.metadata(i.stack_name, i.resource_name)
+        r[e['resource_name']] = e
+    return r
+
+def get_stacks():
+    r = {}
+    for i in heat.stacks.list(nested_depth=5, show_nested=True):
+        e = i.to_dict()
+        try:
+            outputs = heat.stacks.output_list(i.id)
+        except heatclient.exc.HTTPNotFound:
+            try:
+                outputs = heat.stacks.get(i.id).to_dict()
+            except heatclient.exc.HTTPNotFound:
+                outputs = []
+        e['outputs'] = outputs
+        r[e['stack_name']] = e
+    return r
+
+def get_events():
+    r = {}
+    for i in heat.events.list('overcloud', nested_depth=5):
+        e = i.to_dict()
+        r[e['resource_name']] = e
+    return r
+
+def get_software_deployments():
+    return [i.to_dict() for i in heat.software_deployments.list()]
+
+keystone = keystoneclient.Client(
+    username=os.environ['OS_USERNAME'],
+    password=os.environ['OS_PASSWORD'],
+    tenant_name=os.environ['OS_TENANT_NAME'],
+    auth_url=os.environ['OS_AUTH_URL'])
+heat_endpoint = keystone.service_catalog.url_for(
+    service_type='orchestration',
+    endpoint_type='publicURL')
+
+heat = heatClient('1', endpoint=heat_endpoint, token=keystone.auth_token)
+data = {
+    'resources': get_resources(),
+    'stacks': get_stacks(),
+    'events': get_events(),
+    'software_deployments': get_software_deployments(),
+}
+with open('result.json', 'w') as f:
+    json.dump(data, f)
