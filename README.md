@@ -5,6 +5,6 @@ Example:
 
 ```shell
 [stack@undercloud ~]$ ./tripleo-stack-dump
-[stack@undercloud ~]$ jq .stacks.overcloud.outputs.parameters.NeutronNetworkType result.json
+[stack@undercloud ~]$ jq .stacks.overcloud.outputs.parameters.NeutronNetworkType tripleo-stack-dump.json
 "[u'vxlan']"
 ```

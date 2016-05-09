@@ -57,5 +57,5 @@ data = {
     'events': get_events(),
     'software_deployments': get_software_deployments(),
 }
-with open('result.json', 'w') as f:
+with open('tripleo-stack-dump.json', 'w') as f:
     json.dump(data, f)
