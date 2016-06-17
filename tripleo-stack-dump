@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import argparse
 import os
 
 import json
@@ -8,9 +9,9 @@ import heatclient.exc
 from heatclient.client import Client as heatClient
 from keystoneclient.v2_0 import client as keystoneclient
 
-def get_resources():
+def get_resources(stack_name='overcloud'):
     r = {}
-    for i in heat.resources.list('overcloud', nested_depth=5):
+    for i in heat.resources.list(stack_name, nested_depth=5):
         e = i.to_dict()
         e['metadata'] = heat.resources.metadata(i.stack_name, i.resource_name)
         r[e['resource_name']] = e
@@ -31,15 +32,19 @@ def get_stacks():
         r[e['stack_name']] = e
     return r
 
-def get_events():
+def get_events(stack_name='overcloud'):
     r = {}
-    for i in heat.events.list('overcloud', nested_depth=5):
+    for i in heat.events.list(stack_name, nested_depth=5):
         e = i.to_dict()
         r[e['resource_name']] = e
     return r
 
 def get_software_deployments():
     return [i.to_dict() for i in heat.software_deployments.list()]
+
+parser = argparse.ArgumentParser()
+parser.add_argument('stack_name', default='overcloud')
+args = parser.parse_args()
 
 keystone = keystoneclient.Client(
     username=os.environ['OS_USERNAME'],
@@ -52,9 +57,9 @@ heat_endpoint = keystone.service_catalog.url_for(
 
 heat = heatClient('1', endpoint=heat_endpoint, token=keystone.auth_token)
 data = {
-    'resources': get_resources(),
+    'resources': get_resources(stack_name=args.stack_name),
     'stacks': get_stacks(),
-    'events': get_events(),
+    'events': get_events(stack_name=args.stack_name),
     'software_deployments': get_software_deployments(),
 }
 with open('tripleo-stack-dump.json', 'w') as f:
