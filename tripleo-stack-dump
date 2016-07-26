@@ -9,6 +9,11 @@ import heatclient.exc
 from heatclient.client import Client as heatClient
 from keystoneclient.v2_0 import client as keystoneclient
 
+# https://github.com/shazow/urllib3/issues/523
+import requests.packages.urllib3
+requests.packages.urllib3.disable_warnings()
+
+
 def get_resources(stack_name='overcloud'):
     r = {}
     for i in heat.resources.list(stack_name, nested_depth=5):
