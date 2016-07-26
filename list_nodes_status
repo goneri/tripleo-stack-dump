@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eu
 do_ssh="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=quiet heat-admin@"  # noqa
+
+nova list 2>&1|grep -v SubjectAltNameWarning
 for i in $(nova list 2>&1|awk '/ctlplane/ {print $12}'); do
     eval $i
     echo -n "** ${ctlplane} "
