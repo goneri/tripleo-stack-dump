@@ -14,6 +14,7 @@ for i in $(nova list 2>&1|awk '/ctlplane/ {print $12}'); do
     fi
 
     ${do_ssh}${ctlplane} "
+        [ -d /var/lib/heat-config/deployed ] || exit 0
         for f in \$(sudo find /var/lib/heat-config/deployed -name '*.notify.json'); do  # noqa
             if [ \$(sudo jq .deploy_status_code \$f) -ne 0 ]; then
                 sudo jq -r .deploy_stderr \$f
