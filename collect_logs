@@ -1,0 +1,17 @@
+#!/bin/bash
+set -eu
+ssh_args="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=quiet heat-admin@"
+do_ssh="ssh ${ssh_args}"
+
+for i in $(nova list 2>&1|awk '/ctlplane/ {print $12}'); do
+    eval $i
+    [ -z $(${do_ssh}${ctlplane} hostname) ] && continue
+
+    ${do_ssh}${ctlplane} "
+        mkdir -p /tmp/logs/\$(hostname)
+        sudo journalctl -u os-collect-config > /tmp/logs/\$(hostname)/os-collect-config.txt
+    "
+    scp -r -q ${ssh_args}${ctlplane}:/tmp/logs .
+done
+mkdir -p logs/$(hostname)
+sudo journalctl -u os-collect-config > logs/$(hostname)/os-collect-config.txt

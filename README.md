@@ -45,3 +45,7 @@ Error: /usr/sbin/rabbitmqctl add_user maas key_maas_pass returned 2 instead of o
 ** 172.22.216.107 up and running
 ** 172.22.216.108 up and running
 ```
+
+##  collect_logs
+
+Retrieve the os-collect-config logs of all the nodes and store them in a local `logs` directory.
