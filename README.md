@@ -17,7 +17,9 @@ Example:
 
 Loop on each nodes of the cluster and:
 
-- ensure the SSH connection from the undercloud works
+- ensure the SSH connection from the undercloud works, this may help to
+  troubleshoot cases where a node reboot on the wrong device after the ironic
+  deployment.
 - show up the last os-collect-config error found on the node 
 
 ```shell
